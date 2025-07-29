@@ -1,5 +1,5 @@
 export async function createAgent(payload) {
-  const res = await fetch("https://localhost:8443/clients/agents", {
+  const res = await fetch("https://localhost:8443/v1/agents", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

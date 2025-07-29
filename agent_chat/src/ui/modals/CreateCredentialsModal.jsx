@@ -22,16 +22,27 @@ const style = {
   p: 4,
 };
 
-export default function CredentialModal({ open, onClose, lyzrApiKey }) {
+export default function CredentialModal({ open, onClose, onSuccess }) {
   const [name, setName] = useState("");
   const [providerId, setProviderId] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [metaData, setMetaData] = useState("{}");
 
   const mutation = useMutation({
-    mutationFn: values => createCredential(values, lyzrApiKey),
-    onSuccess: () => {
-      setName(""); setProviderId(""); setApiKey(""); setMetaData("{}");
+    mutationFn: values => createCredential(values),
+    onSuccess: (data) => {
+      // Reset form fields
+      setName("");
+      setProviderId("");
+      setApiKey("");
+      setMetaData("{}");
+      
+      // Call onSuccess with the created credential data if provided
+      if (onSuccess && data) {
+        onSuccess(data);
+      }
+      
+      // Close the modal
       onClose();
     },
     onError: error => {
@@ -50,6 +61,7 @@ export default function CredentialModal({ open, onClose, lyzrApiKey }) {
         </Box>
         <form onSubmit={e => {
           e.preventDefault();
+          e.stopPropagation();
           mutation.mutate({
             name, provider_id: providerId, api_key: apiKey, meta_data: metaData,
           });

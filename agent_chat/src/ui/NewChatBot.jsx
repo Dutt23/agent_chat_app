@@ -7,7 +7,6 @@ import { BackButton } from "../components/common";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import providersData from "../data/providers_and_models.json";
-import credentialsData from "../data/credentials.json";
 import { useMutation } from "@tanstack/react-query";
 import { createAgent, parseFeatureConfig, parseResponseFormat } from "../api/agentApi";
 import CreateCredentialsModal from "./modals/CreateCredentialsModal";
@@ -27,6 +26,7 @@ export default function AgentCreationForm() {
   const [topP, setTopP] = useState(0.95);
   const [temperature, setTemperature] = useState(0.7);
   const [responseFormat, setResponseFormat] = useState("{}");
+  const [llmCredentials, setLlmCredentials] = useState(null);
 
   // Options
   const [providerOptions, setProviderOptions] = useState([]);
@@ -50,14 +50,14 @@ export default function AgentCreationForm() {
   // Loads mock/static data
   useEffect(() => {
     setProviderOptions(providersData);
-    setCredentialOptions(credentialsData);
   }, []);
 
   // Update model options when provider changes
   useEffect(() => {
     const found = providerOptions.find((p) => p.id === providerId);
     setModelOptions(found?.models || []);
-    setModel(""); // Reset if provider switches
+    setModel("");
+    setLlmCredentials(found?.credentials[0] || null) // Reset if provider switches
   }, [providerId, providerOptions]);
 
   // Features
@@ -81,11 +81,19 @@ export default function AgentCreationForm() {
   const addTool = () => setTools([...tools, ""]);
   const removeTool = (idx) => setTools(tools.filter((_, i) => i !== idx));
 
-  // Add this function to refresh credentials after a new one is created
-  const handleCredentialCreated = () => {
-    // You might want to add logic here to refresh the credentials list
-    // For example, if you fetch credentials from an API
-    console.log("New credential created, refresh credentials list here");
+  // Function to handle when a new credential is successfully created
+  const handleCredentialCreated = (newCredential) => {
+    // Add the new credential to the existing options
+    setCredentialOptions(prevOptions => [
+      ...prevOptions,
+      {
+        id: newCredential.id,  // Make sure your API returns an id field
+        name: newCredential.name || `Credential ${newCredential.id}`
+      }
+    ]);
+    
+    // Optionally select the newly created credential
+    setLlmCredentialId(newCredential.id);
   };
 
   // Submit
@@ -124,14 +132,14 @@ export default function AgentCreationForm() {
             Create a Lyzr Agent
           </Typography>
           
-          <Button 
+          {/* <Button 
             variant="outlined" 
             onClick={() => setIsCredentialModalOpen(true)}
             sx={{ mb: 3 }}
             startIcon={<AddCircleIcon />}
           >
             Add New Credentials
-          </Button>
+          </Button> */}
 
           <TextField
             fullWidth
@@ -248,11 +256,17 @@ export default function AgentCreationForm() {
             disabled={!providerId}
           />
           
-          <SelectField
+          <TextField
+            fullWidth
             label="LLM Credential"
-            value={llmCredentialId}
-            onChange={(e) => setLlmCredentialId(e.target.value)}
-            options={credentialOptions.filter(c => !providerId || c.provider === providerId)}
+            value={llmCredentials?.display || ''}
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            InputProps={{
+              readOnly: true,
+            }}
           />
           
           <NumberField

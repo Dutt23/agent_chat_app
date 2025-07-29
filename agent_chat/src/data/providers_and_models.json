@@ -5,6 +5,9 @@
     "models": [
       { "id": "gpt-4", "label": "GPT-4" },
       { "id": "gpt-3.5-turbo", "label": "GPT-3.5 Turbo" }
+    ],
+    "credentials": [
+      { "id": "lyzr_openai", "provider": "openai", "display": "My Default OpenAI Key" }
     ]
   },
   {
@@ -12,6 +15,9 @@
     "label": "Anthropic Claude",
     "models": [
       { "id": "claude-3", "label": "Claude 3" }
+    ],
+    "credentials": [
+      { "id": "lyzr_anthropic", "provider": "anthropic", "display": "My Default Anthropic Key" }
     ]
   },
   {
@@ -19,6 +25,9 @@
     "label": "Google Gemini",
     "models": [
       { "id": "gemini-1.5", "label": "Gemini 1.5 Pro" }
+    ],
+    "credentials": [
+      { "id": "lyzr_google", "provider": "google", "display": "My Default Google Key" }
     ]
   }
 ]

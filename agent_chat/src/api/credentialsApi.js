@@ -1,17 +1,16 @@
 // --- API request function
-export async function createCredential({ name, provider_id, api_key, meta_data }, apiKey) {
+export async function createCredential({ name, provider_id, meta_data, api_key }) {
   const payload = {
     name,
     provider_id,
-    credentials: { api_key },
     meta_data: meta_data ? JSON.parse(meta_data) : {},
+    credentials: { api_key },
   };
 
-  const res = await fetch("https://agent-prod.studio.lyzr.ai/v3/tools/credentials", {
+  const res = await fetch("https://localhost:6121/v1/credentials", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey, // Lyzr API key needed here
     },
     body: JSON.stringify(payload),
   });
