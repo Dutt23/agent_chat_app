@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthForm } from "./ui/AuthForm";
 import { Dashboard } from "./ui/Dashboard";
 import  NewChatBot  from "./ui/NewChatBot";
+import ChatPage from "./ui/ChatPage";
 
 function AppContent({ user, setUser }) {
   // Fixed, app-wide background/colors
@@ -29,6 +30,9 @@ function AppContent({ user, setUser }) {
         } />
         <Route path="/chatbots/new" element={
           user ? <NewChatBot /> : <Navigate to="/login" />
+        } />
+        <Route path="/chat/:agentId" element={
+          user ? <ChatPage /> : <Navigate to="/login" />
         } />
       </Routes>
     </Flex>

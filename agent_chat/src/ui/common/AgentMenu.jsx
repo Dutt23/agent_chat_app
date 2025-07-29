@@ -1,17 +1,24 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   IconButton,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
-} from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-const AgentMenu = ({ agentId, onEdit, onDelete, onDuplicate }) => {
+const AgentMenu = ({
+  agentId,
+  agent,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onShowWidget, // New prop for showing widget
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -42,19 +49,27 @@ const AgentMenu = ({ agentId, onEdit, onDelete, onDuplicate }) => {
     if (onDuplicate) onDuplicate(agentId, event);
   };
 
+  const handleChat = (event) => {
+    handleClose(event);
+    if (onShowWidget) {
+      onShowWidget(agent); // Show floating widget instead of navigating
+    }
+  };
+
   return (
     <div>
       <IconButton
         size="small"
         onClick={handleClick}
         sx={{
-          position: 'absolute',
+          position: "absolute",
           top: 12,
           right: 12,
           zIndex: 1,
-          bgcolor: 'background.paper',
-          '&:hover': { bgcolor: 'grey.100' },
+          bgcolor: "background.paper",
+          "&:hover": { bgcolor: "grey.100" },
         }}
+        aria-label="agent options"
       >
         <MoreVertIcon />
       </IconButton>
@@ -64,12 +79,12 @@ const AgentMenu = ({ agentId, onEdit, onDelete, onDuplicate }) => {
         onClose={handleClose}
         onClick={(e) => e.stopPropagation()}
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
       >
         <MenuItem onClick={handleEdit}>
@@ -78,17 +93,19 @@ const AgentMenu = ({ agentId, onEdit, onDelete, onDuplicate }) => {
           </ListItemIcon>
           <ListItemText>Edit</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleDuplicate}>
+
+        <MenuItem onClick={handleChat}>
           <ListItemIcon>
             <ContentCopyIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Duplicate</ListItemText>
+          <ListItemText>Chat</ListItemText>
         </MenuItem>
+
         <MenuItem onClick={handleDelete}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText primaryTypographyProps={{ color: 'error.main' }}>
+          <ListItemText primaryTypographyProps={{ color: "error.main" }}>
             Delete
           </ListItemText>
         </MenuItem>

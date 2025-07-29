@@ -9,13 +9,13 @@ import {
   Avatar,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { listAgent } from "../../api/agentApi";
 import AgentMenu from "../common/AgentMenu";
+import { listAgent } from "../../api/agentApi"; // Assume your API
 
 // Utility to split array into chunks
 function chunkArray(arr, size) {
   const chunks = [];
-  for (let i = 0; i <arr.length; i += size) {
+  for (let i = 0; i < arr.length; i += size) {
     chunks.push(arr.slice(i, i + size));
   }
   return chunks;
@@ -40,19 +40,23 @@ export function AgentListPage() {
 
   const agentsChunks = agents ? chunkArray(agents, 3) : [];
 
+  const [activeAgentForWidget, setActiveAgentForWidget] = React.useState(null);
+
   const handleEdit = (agentId, event) => {
-    console.log('Edit agent:', agentId);
-    // Add your edit logic here
+    console.log("Edit agent:", agentId);
   };
 
   const handleDelete = (agentId, event) => {
-    console.log('Delete agent:', agentId);
-    // Add your delete logic here
+    console.log("Delete agent:", agentId);
   };
 
   const handleDuplicate = (agentId, event) => {
-    console.log('Duplicate agent:', agentId);
-    // Add your duplicate logic here
+    console.log("Duplicate agent:", agentId);
+  };
+
+  // New handler to show the chat widget
+  const handleShowWidget = (agent) => {
+    setActiveAgentForWidget(agent);
   };
 
   if (isLoading) {
@@ -95,95 +99,110 @@ export function AgentListPage() {
           px: { xs: 2, sm: 3, md: 6 },
         }}
       >
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          mb={4}
-          color="text.primary"
-        >
+        <Typography variant="h4" fontWeight={700} mb={4} color="text.primary">
           Agents
         </Typography>
 
-        {isLoading ? (
-          <Box textAlign="center" mt={8}>
-            <CircularProgress />
-          </Box>
-        ) : isError ? (
-          <Alert severity="error" sx={{ my: 4 }}>
-            Unable to load agents.
-          </Alert>
-        ) : (
-          agentsChunks.map((chunk, idx) => (
-            <Grid
-              container
-              spacing={4}
-              key={`row-${idx}`}
-              sx={{ mb: 2 }}
-            >
-              {chunk.map((agent) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={4}
-                  key={agent._id}
-                  sx={{ width: "100%" }}
+        {agentsChunks.map((chunk, idx) => (
+          <Grid container spacing={4} key={`row-${idx}`} sx={{ mb: 2 }}>
+            {chunk.map((agent) => (
+              <Grid item xs={12} sm={4} key={agent._id} sx={{ width: "100%" }}>
+                <Card
+                  elevation={3}
+                  sx={{
+                    height: 160,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    position: "relative",
+                    borderRadius: 3,
+                    px: 2,
+                    py: 2,
+                    width: "100%",
+                    cursor: "pointer",
+                    "&:hover": {
+                      boxShadow: 6,
+                      transform: "translateY(-2px)",
+                      transition: "all 0.2s ease-in-out",
+                    },
+                    transition: "all 0.2s ease-in-out",
+                  }}
                 >
-                  <Card
-                    elevation={3}
+                  <AgentMenu
+                    agentId={agent._id}
+                    agent={agent}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onDuplicate={handleDuplicate}
+                    onShowWidget={handleShowWidget} // pass handler here
+                  />
+                  <Box
                     sx={{
-                      height: 160,
                       display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      position: "relative",
-                      borderRadius: 3,
-                      px: 2,
-                      py: 2,
-                      width: "100%",
-                      cursor: 'pointer',
-                      '&:hover': {
-                        boxShadow: 6,
-                        transform: 'translateY(-2px)',
-                        transition: 'all 0.2s ease-in-out',
-                      },
-                      transition: 'all 0.2s ease-in-out',
+                      alignItems: "center",
+                      mt: 1,
+                      gap: 2,
                     }}
                   >
-                    <AgentMenu 
-                      agentId={agent._id}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onDuplicate={handleDuplicate}
-                    />
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", mt: 1, gap: 2 }}
+                    <Avatar
+                      sx={{
+                        width: 54,
+                        height: 54,
+                        bgcolor: "primary.light",
+                        fontWeight: 600,
+                        color: "primary.dark",
+                        fontSize: 22,
+                      }}
                     >
-                      <Avatar
-                        sx={{
-                          width: 54,
-                          height: 54,
-                          bgcolor: "primary.light",
-                          fontWeight: 600,
-                          color: "primary.dark",
-                          fontSize: 22,
-                        }}
-                      >
-                        {getInitials(agent.name)}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight={600}>
-                          {agent.name || "Unnamed Agent"}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" mt={0.5}>
-                          {agent.description || "No description provided."}
-                        </Typography>
-                      </Box>
+                      {getInitials(agent.name)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {agent.name || "Unnamed Agent"}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" mt={0.5}>
+                        {agent.description || "No description provided."}
+                      </Typography>
                     </Box>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          ))
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ))}
+
+        {/* Floating Chat Widget/Icon */}
+        {activeAgentForWidget && (
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 32,
+              right: 32,
+              zIndex: 1300,
+              bgcolor: "primary.main",
+              borderRadius: "50%",
+              width: 64,
+              height: 64,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "white",
+              boxShadow: 6,
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+            onClick={() => {
+              // You can replace this with chat window open logic
+              alert(`Open chat with ${activeAgentForWidget.name}`);
+              // For demo, just close the widget after click
+              setActiveAgentForWidget(null);
+            }}
+            title={`Chat with ${activeAgentForWidget.name}`}
+            role="button"
+            aria-label={`Chat with ${activeAgentForWidget.name}`}
+          >
+            💬
+          </Box>
         )}
       </Box>
     </Box>
