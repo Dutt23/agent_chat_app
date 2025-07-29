@@ -1,0 +1,78 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sdutt/agentserver/configs"
+)
+
+type AppRunner struct {
+	server    *Server
+	Closeable []func(context.Context) error
+}
+
+func main() {
+  ctx := context.Background()
+  appRunner := AppRunner{}
+	// resolving configuration
+	cfg, err := appRunner.ResolveConfig()
+	if err != nil {
+		panic(err)
+	}
+	s, err := NewServer(cfg)
+  if err != nil {
+		panic(err)
+	}
+  appRunner.server = s
+	appRunner.Init(ctx)
+	defer appRunner.close(ctx)
+  appRunner.server.E.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+}
+
+func (app *AppRunner) ResolveConfig() (*configs.AppConfig, error) {
+	vConfig, err := configs.InitConfig()
+	if err != nil {
+		log.Fatalf("Unable to parse viper config to application configuration : %v", err)
+		return nil, err
+	}
+
+	cfg, err := configs.GetApplicationConfig(vConfig)
+	if err != nil {
+		log.Fatalf("Unable to parse viper config to application configuration : %v", err)
+		return nil, err
+	}
+
+	gin.SetMode(gin.ReleaseMode)
+	// debug mode of gin when runing log in debug mode.
+	if cfg.LogLevel == "debug" {
+		gin.SetMode(gin.DebugMode)
+	}
+	return cfg, nil
+}
+
+func (app *AppRunner) Init(ctx context.Context) error {
+	err := app.server.DB.Connect(ctx)
+	if err != nil {
+		fmt.Println("error while connecting to postgres.", err)
+		return err
+	}
+	app.server.DB = app.server.DB
+	app.Closeable = append(app.Closeable, app.server.DB.Disconnect)
+
+	return nil
+}
+
+func (app *AppRunner) close(ctx context.Context) {
+	if len(app.Closeable) > 0 {
+		fmt.Println("there are closeable references to closed")
+		for _, closeable := range app.Closeable {
+			err := closeable(ctx)
+			if err != nil {
+				fmt.Println("error while closing %v", err)
+			}
+		}
+	}
+}
