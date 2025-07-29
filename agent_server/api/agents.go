@@ -35,3 +35,12 @@ func (api *agentApi) CreateAgent(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+func (api *agentApi) ListAgents(c *gin.Context) {
+	resp, err := api.lyzrClient.ListAgents(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}

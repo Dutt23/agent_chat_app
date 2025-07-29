@@ -26,6 +26,18 @@ func (client *LyzrClient) CreateAgent(ctx context.Context, payload models.AgentP
 	)
 }
 
+func (client *LyzrClient) ListAgents(ctx context.Context) ([]Agent, error) {
+	url := client.config.LyzrAPIURL + "/v3/agents/"
+	headers := map[string]string{
+		"x-api-key": client.config.LyzrAPIKey,
+		"accept":    "application/json",
+	}
+	resp, err := CallAndUnmarshal[[]Agent](
+		ctx, http.MethodGet, url, nil, headers,
+	)
+	return *resp, err
+}
+
 func (client *LyzrClient) CreateCredentials(ctx context.Context, payload models.CredentialPayload) (*AgentResponse, error) {
 	url := client.config.LyzrAPIURL + "/v3/tools/credentials"
 	headers := map[string]string{

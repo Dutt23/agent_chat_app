@@ -87,6 +87,7 @@ func (server *Server) setupRouter(opts *routerOpts) {
 func (server *Server) addAgentRoutes(grp *gin.RouterGroup, opts *routerOpts) {
 	agentHandler := api.NewAgentApi(opts.config, opts.lyzr_client)
 	grp.POST("/agents", agentHandler.CreateAgent)
+	grp.GET("/agents", agentHandler.ListAgents)
 }
 
 func (server *Server) addCredentialRoutes(grp *gin.RouterGroup, opts *routerOpts) {
