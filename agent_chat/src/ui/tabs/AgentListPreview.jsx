@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import AgentMenu from "../common/AgentMenu";
-import { listAgent } from "../../api/agentApi"; // Assume your API
+import { listAgent } from "../../api/agentApi"; // Your API function
 
 // Utility to split array into chunks
 function chunkArray(arr, size) {
@@ -21,7 +21,7 @@ function chunkArray(arr, size) {
   return chunks;
 }
 
-// Utility for Avatar initials
+// Utility for avatar initials
 function getInitials(name) {
   return name
     ? name
@@ -42,6 +42,104 @@ export function AgentListPage() {
 
   const [activeAgentForWidget, setActiveAgentForWidget] = React.useState(null);
 
+  // Widget position (start near bottom-right with some margin)
+  const [widgetPos, setWidgetPos] = React.useState({
+    x: window.innerWidth - 96,
+    y: window.innerHeight - 96,
+  });
+
+  // Drag state
+  const [dragging, setDragging] = React.useState(false);
+  const dragOffset = React.useRef({ x: 0, y: 0 });
+
+  // Function to constrain position within viewport (64x64 widget size)
+  const constrainPosition = React.useCallback(({ x, y }) => {
+    const minX = 0;
+    const minY = 0;
+    const maxX = window.innerWidth - 64;
+    const maxY = window.innerHeight - 64;
+    return {
+      x: Math.min(Math.max(x, minX), maxX),
+      y: Math.min(Math.max(y, minY), maxY),
+    };
+  }, []);
+
+  // Mouse / touch down handler: start dragging
+  const startDrag = React.useCallback((clientX, clientY) => {
+    setDragging(true);
+    dragOffset.current = {
+      x: clientX - widgetPos.x,
+      y: clientY - widgetPos.y,
+    };
+  }, [widgetPos]);
+
+  // Mouse down
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    startDrag(e.clientX, e.clientY);
+  };
+
+  // Touch start
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    startDrag(touch.clientX, touch.clientY);
+  };
+
+  // Mouse / touch move handler
+  const handleMove = React.useCallback(
+    (clientX, clientY) => {
+      if (!dragging) return;
+      const newPos = {
+        x: clientX - dragOffset.current.x,
+        y: clientY - dragOffset.current.y,
+      };
+      setWidgetPos(constrainPosition(newPos));
+    },
+    [dragging, constrainPosition]
+  );
+
+  // Mouse move
+  const onMouseMove = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      handleMove(e.clientX, e.clientY);
+    },
+    [handleMove]
+  );
+
+  // Touch move
+  const onTouchMove = React.useCallback(
+    (e) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      handleMove(touch.clientX, touch.clientY);
+    },
+    [handleMove]
+  );
+
+  // End dragging handler (mouse up or touch end)
+  const endDrag = React.useCallback(() => {
+    setDragging(false);
+  }, []);
+
+  // Setup & cleanup global listeners while dragging
+  React.useEffect(() => {
+    if (dragging) {
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", endDrag);
+      window.addEventListener("touchmove", onTouchMove, { passive: false });
+      window.addEventListener("touchend", endDrag);
+
+      return () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", endDrag);
+        window.removeEventListener("touchmove", onTouchMove);
+        window.removeEventListener("touchend", endDrag);
+      };
+    }
+  }, [dragging, onMouseMove, onTouchMove, endDrag]);
+
   const handleEdit = (agentId, event) => {
     console.log("Edit agent:", agentId);
   };
@@ -54,9 +152,12 @@ export function AgentListPage() {
     console.log("Duplicate agent:", agentId);
   };
 
-  // New handler to show the chat widget
+  // Show the chat widget
   const handleShowWidget = (agent) => {
     setActiveAgentForWidget(agent);
+
+    // Reset widget position to bottom-right on new agent chat open (optional)
+    setWidgetPos({ x: window.innerWidth - 96, y: window.innerHeight - 96 });
   };
 
   if (isLoading) {
@@ -134,7 +235,7 @@ export function AgentListPage() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onDuplicate={handleDuplicate}
-                    onShowWidget={handleShowWidget} // pass handler here
+                    onShowWidget={handleShowWidget}
                   />
                   <Box
                     sx={{
@@ -171,13 +272,13 @@ export function AgentListPage() {
           </Grid>
         ))}
 
-        {/* Floating Chat Widget/Icon */}
+        {/* Draggable Floating Chat Widget */}
         {activeAgentForWidget && (
           <Box
             sx={{
               position: "fixed",
-              bottom: 32,
-              right: 32,
+              left: widgetPos.x,
+              top: widgetPos.y,
               zIndex: 1300,
               bgcolor: "primary.main",
               borderRadius: "50%",
@@ -188,18 +289,18 @@ export function AgentListPage() {
               alignItems: "center",
               color: "white",
               boxShadow: 6,
-              cursor: "pointer",
+              cursor: dragging ? "grabbing" : "grab",
               userSelect: "none",
+              touchAction: "none", // important for preventing scroll on touch devices during drag
             }}
-            onClick={() => {
-              // You can replace this with chat window open logic
-              alert(`Open chat with ${activeAgentForWidget.name}`);
-              // For demo, just close the widget after click
-              setActiveAgentForWidget(null);
-            }}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
             title={`Chat with ${activeAgentForWidget.name}`}
             role="button"
             aria-label={`Chat with ${activeAgentForWidget.name}`}
+            onClick={() => {
+              alert(`Open chat with ${activeAgentForWidget.name}`);
+            }}
           >
             💬
           </Box>
