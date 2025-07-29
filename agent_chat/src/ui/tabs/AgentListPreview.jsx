@@ -8,8 +8,15 @@ import {
   Alert,
   IconButton,
   Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useQuery } from "@tanstack/react-query";
 import { listAgent } from "../../api/agentApi";
 
@@ -31,6 +38,96 @@ function getInitials(name) {
         .join("")
         .toUpperCase()
     : "";
+}
+
+// Add this new component for the agent menu
+function AgentMenu({ agentId }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setAnchorEl(null);
+  };
+
+  const handleEdit = (event) => {
+    handleClose(event);
+    console.log('Edit agent:', agentId);
+    // Add your edit logic here
+  };
+
+  const handleDelete = (event) => {
+    handleClose(event);
+    console.log('Delete agent:', agentId);
+    // Add your delete logic here
+  };
+
+  const handleDuplicate = (event) => {
+    handleClose(event);
+    console.log('Duplicate agent:', agentId);
+    // Add your duplicate logic here
+  };
+
+  return (
+    <div>
+      <IconButton
+        size="small"
+        onClick={handleClick}
+        sx={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+          zIndex: 1,
+          bgcolor: "background.paper",
+          "&:hover": { bgcolor: "grey.100" },
+        }}
+      >
+        <MoreVertIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        onClick={(e) => e.stopPropagation()}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleEdit}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Edit</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDuplicate}>
+          <ListItemIcon>
+            <ContentCopyIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Duplicate</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ color: 'error.main' }}>
+            Delete
+          </ListItemText>
+        </MenuItem>
+      </Menu>
+    </div>
+  );
 }
 
 export function AgentListPage() {
@@ -66,40 +163,31 @@ export function AgentListPage() {
   }
 
   return (
-  <Box
-    sx={{
-      py: 4,
-      px: 0, // remove horizontal padding to allow full-width background
-      bgcolor: "#f8fafd",
-      minHeight: "100vh",
-    }}
-  >
     <Box
       sx={{
-        maxWidth: 1200, // limit content width for readability
-        mx: "auto", // center horizontally
-        px: { xs: 2, sm: 3, md: 6 }, // inner padding
+        py: 4,
+        px: 0,
+        bgcolor: "#f8fafd",
+        minHeight: "100vh",
       }}
     >
-      <Typography
-        variant="h4"
-        fontWeight={700}
-        mb={4}
-        color="text.primary" // ensure visible text
+      <Box
+        sx={{
+          maxWidth: 1200,
+          mx: "auto",
+          px: { xs: 2, sm: 3, md: 6 },
+        }}
       >
-        Agents
-      </Typography>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          mb={4}
+          color="text.primary"
+        >
+          Agents
+        </Typography>
 
-      {isLoading ? (
-        <Box textAlign="center" mt={8}>
-          <CircularProgress />
-        </Box>
-      ) : isError ? (
-        <Alert severity="error" sx={{ my: 4 }}>
-          Unable to load agents.
-        </Alert>
-      ) : (
-        agentsChunks.map((chunk, idx) => (
+        {agentsChunks.map((chunk, idx) => (
           <Grid
             container
             spacing={4}
@@ -112,7 +200,7 @@ export function AgentListPage() {
                 xs={12}
                 sm={4}
                 key={agent._id}
-                sx={{ width: "100%" }} // full width to grid item
+                sx={{ width: "100%" }}
               >
                 <Card
                   elevation={3}
@@ -125,22 +213,17 @@ export function AgentListPage() {
                     borderRadius: 3,
                     px: 2,
                     py: 2,
-                    width: "100%", // full width of grid item
+                    width: "100%",
+                    cursor: 'pointer',
+                    '&:hover': {
+                      boxShadow: 6,
+                      transform: 'translateY(-2px)',
+                      transition: 'all 0.2s ease-in-out',
+                    },
+                    transition: 'all 0.2s ease-in-out',
                   }}
                 >
-                  <IconButton
-                    size="small"
-                    sx={{
-                      position: "absolute",
-                      top: 12,
-                      right: 12,
-                      zIndex: 1,
-                      bgcolor: "background.paper",
-                      "&:hover": { bgcolor: "grey.100" },
-                    }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
+                  <AgentMenu agentId={agent._id} />
                   <Box
                     sx={{ display: "flex", alignItems: "center", mt: 1, gap: 2 }}
                   >
@@ -169,10 +252,8 @@ export function AgentListPage() {
               </Grid>
             ))}
           </Grid>
-        ))
-      )}
+        ))}
+      </Box>
     </Box>
-  </Box>
-);
-
+  );
 }
