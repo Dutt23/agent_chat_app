@@ -12,7 +12,9 @@ export default function AgentCreationForm({ onSubmit }) {
   const [name, setName] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [description, setDescription] = useState("");
-  const [features, setFeatures] = useState([{ type: "", config: "{}", priority: 0 }]);
+  const [features, setFeatures] = useState([
+    { type: "", config: "{}", priority: 0 }
+  ]);
   const [tools, setTools] = useState([""]);
   const [llmCredentialId, setLlmCredentialId] = useState("");
   const [providerId, setProviderId] = useState("");
@@ -20,67 +22,74 @@ export default function AgentCreationForm({ onSubmit }) {
   const [topP, setTopP] = useState(0.95);
   const [temperature, setTemperature] = useState(0.7);
   const [responseFormat, setResponseFormat] = useState("{}");
+
   // Options
   const [providerOptions, setProviderOptions] = useState([]);
   const [credentialOptions, setCredentialOptions] = useState([]);
   const [modelOptions, setModelOptions] = useState([]);
-  
-  // Set initial data
+
+  // Loads mock/static data
   useEffect(() => {
-    try {
-      setProviderOptions(providersData);
-      setCredentialOptions(credentialsData);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
+    setProviderOptions(providersData);
+    setCredentialOptions(credentialsData);
   }, []);
 
   // Update model options when provider changes
   useEffect(() => {
-    const found = providerOptions.find(p => p.id === providerId);
+    const found = providerOptions.find((p) => p.id === providerId);
     setModelOptions(found?.models || []);
-    setModel(""); // Clear model if provider changes
+    setModel(""); // Reset if provider switches
   }, [providerId, providerOptions]);
-  
-  // Feature handlers
+
+  // Features
   const handleFeatureChange = (idx, field, value) => {
     setFeatures(features.map((f, i) =>
       i === idx ? { ...f, [field]: value } : f
     ));
   };
-  const addFeature = () => setFeatures([...features, { type: "", config: "{}", priority: 0 }]);
-  const removeFeature = idx => setFeatures(features.filter((_, i) => i !== idx));
-  
-  // Tool handlers
+  const addFeature = () =>
+    setFeatures([...features, { type: "", config: "{}", priority: 0 }]);
+  const removeFeature = (idx) =>
+    setFeatures(features.filter((_, i) => i !== idx));
+
+  // Tools
   const handleToolChange = (idx, value) => {
-    setTools(tools.map((t, i) => i === idx ? value : t));
+    setTools(tools.map((t, i) => (i === idx ? value : t)));
   };
   const addTool = () => setTools([...tools, ""]);
-  const removeTool = idx => setTools(tools.filter((_, i) => i !== idx));
-  
+  const removeTool = (idx) => setTools(tools.filter((_, i) => i !== idx));
+
   // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onSubmit)
-      onSubmit({
-        name,
-        system_prompt: systemPrompt,
-        description,
-        features: features.map(f => ({
-          type: f.type,
-          config: JSON.parse(f.config || "{}"),
-          priority: Number(f.priority)
-        })),
-        tools: tools.filter(t => !!t),
-        llm_credential_id: llmCredentialId,
-        provider_id: providerId,
-        model,
-        top_p: Number(topP),
-        temperature: Number(temperature),
-        response_format: JSON.parse(responseFormat || "{}")
-      });
+    // Defensive parse for config and response_format
+    const safeJsonParse = (txt) => {
+      try {
+        return JSON.parse(txt || "{}");
+      } catch {
+        return {};
+      }
+    };
+    const payload = {
+      name: name,
+      system_prompt: systemPrompt,
+      description: description,
+      features: features.map((f) => ({
+        type: f.type,
+        config: safeJsonParse(f.config),
+        priority: Number(f.priority)
+      })),
+      tools: tools.filter(Boolean),
+      llm_credential_id: llmCredentialId,
+      provider_id: providerId,
+      model: model,
+      top_p: Number(topP),
+      temperature: Number(temperature),
+      response_format: safeJsonParse(responseFormat)
+    };
+    if (onSubmit) onSubmit(payload);
   };
-  
+
   return (
     <Container maxWidth="md">
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 6, mb: 6 }}>
@@ -91,26 +100,24 @@ export default function AgentCreationForm({ onSubmit }) {
           <TextField
             label="Agent Name"
             value={name}
-            onChange={e => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
+            onChange={(e) => setName(e.target.value)}
+            fullWidth margin="normal" required
           />
           <TextField
             label="System Prompt"
             value={systemPrompt}
-            onChange={e => setSystemPrompt(e.target.value)}
+            onChange={(e) => setSystemPrompt(e.target.value)}
             multiline rows={2}
             fullWidth margin="normal" required
           />
           <TextField
             label="Description"
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
             multiline rows={2}
             fullWidth margin="normal" required
           />
-          
+
           {/* Features */}
           <Typography sx={{ mt: 3 }}>Features</Typography>
           {features.map((f, idx) => (
@@ -141,18 +148,24 @@ export default function AgentCreationForm({ onSubmit }) {
                 />
               </Grid>
               <Grid item xs={2}>
-                <IconButton onClick={() => removeFeature(idx)} disabled={features.length === 1} color="error" size="large">
-                  <RemoveCircleIcon />
-                </IconButton>
+                <IconButton
+                  onClick={() => removeFeature(idx)}
+                  disabled={features.length === 1}
+                  color="error"
+                  size="large"
+                ><RemoveCircleIcon /></IconButton>
               </Grid>
             </Grid>
           ))}
           <Button
             variant="outlined"
-            startIcon={<AddCircleIcon />} onClick={addFeature} sx={{ mb: 2 }}>
+            startIcon={<AddCircleIcon />}
+            onClick={addFeature}
+            sx={{ mb: 2 }}
+          >
             Add Feature
           </Button>
-          
+
           {/* Tools */}
           <Typography sx={{ mt: 3 }}>Tools</Typography>
           {tools.map((tool, idx) => (
@@ -161,30 +174,35 @@ export default function AgentCreationForm({ onSubmit }) {
                 <TextField
                   label="Tool"
                   value={tool}
-                  onChange={e => handleToolChange(idx, e.target.value)}
+                  onChange={(e) => handleToolChange(idx, e.target.value)}
                   size="small"
                   fullWidth required={idx === 0}
                 />
               </Grid>
               <Grid item xs={2}>
-                <IconButton onClick={() => removeTool(idx)} disabled={tools.length === 1} color="error" size="large">
-                  <RemoveCircleIcon />
-                </IconButton>
+                <IconButton
+                  onClick={() => removeTool(idx)}
+                  disabled={tools.length === 1}
+                  color="error" size="large"
+                ><RemoveCircleIcon /></IconButton>
               </Grid>
             </Grid>
           ))}
           <Button
             variant="outlined"
-            startIcon={<AddCircleIcon />} onClick={addTool} sx={{ mb: 2 }}>
+            startIcon={<AddCircleIcon />}
+            onClick={addTool}
+            sx={{ mb: 2 }}
+          >
             Add Tool
           </Button>
-          
-          {/* Credential */}
+
+          {/* Credentials */}
           <TextField
             select label="LLM Credential"
             value={llmCredentialId}
             onChange={e => setLlmCredentialId(e.target.value)}
-            fullWidth margin="normal" required
+            fullWidth required margin="normal"
           >
             {credentialOptions
               .filter(c => !providerId || c.provider === providerId)
@@ -192,35 +210,31 @@ export default function AgentCreationForm({ onSubmit }) {
                 <MenuItem key={option.id} value={option.id}>{option.display}</MenuItem>
               ))}
           </TextField>
-          
-          {/* Provider (loads models) */}
+
+          {/* Provider */}
           <TextField
             select label="Provider"
             value={providerId}
             onChange={e => setProviderId(e.target.value)}
-            fullWidth margin="normal" required
+            fullWidth required margin="normal"
           >
             {providerOptions.map(option => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.label}
-              </MenuItem>
+              <MenuItem key={option.id} value={option.id}>{option.label}</MenuItem>
             ))}
           </TextField>
-          
+
           {/* Model */}
           <TextField
             select label="Model"
             value={model}
             onChange={e => setModel(e.target.value)}
-            fullWidth margin="normal" required disabled={!providerId}
+            fullWidth required margin="normal" disabled={!providerId}
           >
             {modelOptions.map(option => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.label}
-              </MenuItem>
+              <MenuItem key={option.id} value={option.id}>{option.label}</MenuItem>
             ))}
           </TextField>
-          
+
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TextField
@@ -228,7 +242,8 @@ export default function AgentCreationForm({ onSubmit }) {
                 type="number"
                 inputProps={{ step: 0.01, min: 0, max: 1 }}
                 value={topP}
-                onChange={e => setTopP(e.target.value)} fullWidth margin="normal"
+                onChange={e => setTopP(e.target.value)}
+                fullWidth required margin="normal"
               />
             </Grid>
             <Grid item xs={6}>
@@ -237,7 +252,8 @@ export default function AgentCreationForm({ onSubmit }) {
                 type="number"
                 inputProps={{ step: 0.01, min: 0, max: 2 }}
                 value={temperature}
-                onChange={e => setTemperature(e.target.value)} fullWidth margin="normal"
+                onChange={e => setTemperature(e.target.value)}
+                fullWidth required margin="normal"
               />
             </Grid>
           </Grid>
@@ -245,8 +261,10 @@ export default function AgentCreationForm({ onSubmit }) {
             label="Response Format (JSON)"
             value={responseFormat}
             onChange={e => setResponseFormat(e.target.value)}
-            multiline rows={2} fullWidth margin="normal" placeholder="{}"
+            multiline rows={2} fullWidth required margin="normal"
+            placeholder="{}"
           />
+
           <Button type="submit" variant="contained" color="primary" size="large" sx={{ mt: 3 }}>
             Create Agent
           </Button>
