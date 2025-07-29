@@ -9,17 +9,16 @@ import (
 )
 
 type agentApi struct {
-  config *configs.AppConfig
-
+	config *configs.AppConfig
 }
 
-func NewAgentApi(config *configs.AppConfig, ) *agentApi {
+func NewAgentApi(config *configs.AppConfig) *agentApi {
 	return &agentApi{config}
 }
 
 func (api *agentApi) CreateAgent(c *gin.Context) {
 	var payload lyzr.AgentPayload
-  if err := c.ShouldBindJSON(&payload); err != nil {
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}

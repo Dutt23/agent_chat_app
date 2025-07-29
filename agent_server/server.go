@@ -10,41 +10,39 @@ import (
 	"github.com/sdutt/agentserver/pkg/connectors"
 )
 
-
 type Server struct {
-	config       *configs.AppConfig
-	DB           connectors.SqliteConnector
-	Closeable    []func(context.Context) error
-	E            *gin.Engine
-  S *http3.Server
+	config    *configs.AppConfig
+	DB        connectors.SqliteConnector
+	Closeable []func(context.Context) error
+	E         *gin.Engine
+	S         *http3.Server
 }
 
-type routerOpts struct {}
+type routerOpts struct{}
 
 func NewServer(config *configs.AppConfig) (*Server, error) {
-  server := &Server{
-    config: config,
-    }
+	server := &Server{
+		config: config,
+	}
 
-    // Init storages
+	// Init storages
 	server.AllConnectors()
 
-  opts := &routerOpts{}
-  server.setupRouter(opts)
-  router := gin.Default()
-  cert, err := tls.LoadX509KeyPair("server.crt", "server.key")
-  if err != nil {
-    return nil, err
-  }
-  tlsConf := &tls.Config{
-    Certificates: []tls.Certificate{cert},
-    
-}
-  server.S = &http3.Server{
-        Addr:        ":8443",
-        Handler:     router, // <-- Gin router (handles all routes
-        TLSConfig: http3.ConfigureTLSConfig(tlsConf)    }
-  return server, nil
+	opts := &routerOpts{}
+	server.setupRouter(opts)
+	router := gin.Default()
+	cert, err := tls.LoadX509KeyPair("server.crt", "server.key")
+	if err != nil {
+		return nil, err
+	}
+	tlsConf := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+	}
+	server.S = &http3.Server{
+		Addr:      ":8443",
+		Handler:   router, // <-- Gin router (handles all routes
+		TLSConfig: http3.ConfigureTLSConfig(tlsConf)}
+	return server, nil
 }
 
 func (s *Server) AllConnectors() {

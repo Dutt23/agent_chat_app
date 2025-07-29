@@ -9,15 +9,18 @@ import (
 )
 
 type AppConfig struct {
-	Name              string      `mapstructure:"service_name" validate:"required"`
-	DBSource          string      `mapstructure:"db_source" validate:"required"`
-	DbConfig          DBConfig    `mapstructure:"db" validate:"required"`
-	MigrationUrl      string      `mapstructure:"migration_url" validate:"required"`
-	Version           string      `mapstructure:"version" validate:"required"`
-	Host              string      `mapstructure:"host" validate:"required"`
-	Secret            string      `mapstructure:"secret" validate:"required"`
-	Port              int         `mapstructure:"port" validate:"required"`
-	LogLevel          string      `mapstructure:"log_level" validate:"required"`
+	Name         string   `mapstructure:"service_name" validate:"required"`
+	DBSource     string   `mapstructure:"db_source" validate:"required"`
+	DbConfig     DBConfig `mapstructure:"db" validate:"required"`
+	MigrationUrl string   `mapstructure:"migration_url" validate:"required"`
+	Version      string   `mapstructure:"version" validate:"required"`
+	Host         string   `mapstructure:"host" validate:"required"`
+	Secret       string   `mapstructure:"secret" validate:"required"`
+	Port         int      `mapstructure:"port" validate:"required"`
+	LogLevel     string   `mapstructure:"log_level" validate:"required"`
+
+	LyzrAPIURL string `mapstructure:"lyzr_api_url" validate:"required"`
+	LyzrAPIKey string `mapstructure:"lyzr_api_key" validate:"required"`
 }
 
 func InitConfig() (*viper.Viper, error) {

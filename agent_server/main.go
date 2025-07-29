@@ -15,21 +15,21 @@ type AppRunner struct {
 }
 
 func main() {
-  ctx := context.Background()
-  appRunner := AppRunner{}
+	ctx := context.Background()
+	appRunner := AppRunner{}
 	// resolving configuration
 	cfg, err := appRunner.ResolveConfig()
 	if err != nil {
 		panic(err)
 	}
 	s, err := NewServer(cfg)
-  if err != nil {
+	if err != nil {
 		panic(err)
 	}
-  appRunner.server = s
+	appRunner.server = s
 	appRunner.Init(ctx)
 	defer appRunner.close(ctx)
-  appRunner.server.S.ListenAndServe()
+	appRunner.server.S.ListenAndServe()
 }
 
 func (app *AppRunner) ResolveConfig() (*configs.AppConfig, error) {

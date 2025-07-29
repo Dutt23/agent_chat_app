@@ -4,8 +4,8 @@ import "github.com/go-playground/validator"
 
 type Feature struct {
 	Type     string                 `json:"type" validate:"required"`
-	Config   map[string]interface{} `json:"config" validate:"required"`   // can be empty object
-	Priority int                    `json:"priority" validate:"gte=0"`   // non-negative
+	Config   map[string]interface{} `json:"config" validate:"required"` // can be empty object
+	Priority int                    `json:"priority" validate:"gte=0"`  // non-negative
 }
 
 type AgentPayload struct {
