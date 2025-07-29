@@ -3,6 +3,7 @@ import {
   Container, Box, TextField, Button, Typography, Paper, Grid
 } from "@mui/material";
 import { SelectField, NumberField, DynamicList } from "../components/forms/common";
+import { BackButton } from "../components/common";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import providersData from "../data/providers_and_models.json";
@@ -96,7 +97,8 @@ export default function AgentCreationForm({ onSubmit }) {
 
   return (
     <Container maxWidth="md">
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 6, mb: 6 }}>
+      <BackButton />
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, mb: 6 }}>
         <Paper sx={{ p: 4 }}>
           <Typography variant="h5" color="primary" gutterBottom>
             Create a Lyzr Agent
