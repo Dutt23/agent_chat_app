@@ -5,12 +5,14 @@ import {
   Avatar,
   TextField,
   IconButton,
-
   Paper,
+  InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { useLocation } from 'react-router-dom';
-// Utility for avatar initials (reuse yours)
+import ClearIcon from "@mui/icons-material/Clear";
+
+// Utility for avatar initials
 function getInitials(name) {
   return name
     ? name
@@ -21,19 +23,8 @@ function getInitials(name) {
     : "";
 }
 
-// Example chat message shape
-// {
-//   id: string | number,
-//   from: "user" | "agent",
-//   text: string,
-//   timestamp: Date
-// }
-
-export default function ChatPage() {
-  const location = useLocation();
-  const agent = location.state?.agent;
+export default function ChatPage({ agent }) {
   const [messages, setMessages] = React.useState([
-    // Initial system message or greeting from the agent
     {
       id: 1,
       from: "agent",
@@ -43,10 +34,18 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = React.useState("");
 
+  // Ref for messages container for scrolling to bottom
+  const messagesEndRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   const handleSend = () => {
     if (!input.trim()) return;
 
-    // Add user message
     const userMessage = {
       id: Date.now(),
       from: "user",
@@ -56,8 +55,7 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // TODO: Integrate with backend/chatbot here
-    // For now, simulate a reply after 1 sec
+    // Simulate agent reply
     setTimeout(() => {
       const replyMessage = {
         id: Date.now() + 1,
@@ -69,72 +67,111 @@ export default function ChatPage() {
     }, 1000);
   };
 
+  const handleClearInput = () => {
+    setInput("");
+  };
+
   return (
     <Box
       sx={{
-        maxWidth: 600,
-        height: "80vh",
-        mx: "auto",
-        my: 4,
+        height: "100%",
+        width: "100%",
+        borderRadius: 0,
+        border: "none",
         display: "flex",
         flexDirection: "column",
-        border: "1px solid #ccc",
-        borderRadius: 2,
         overflow: "hidden",
+        backgroundColor: "background.paper",
+        boxShadow: "none",
       }}
     >
-      {/* Agent Header */}
+      {/* Header */}
       <Box
         sx={{
           bgcolor: "primary.main",
           color: "primary.contrastText",
-          px: 2,
-          py: 1,
+          px: 3,
+          py: 2,
           display: "flex",
           alignItems: "center",
           gap: 2,
+          boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+          userSelect: "none",
         }}
       >
-        <Avatar sx={{ bgcolor: "primary.light" }}>
+        <Avatar sx={{ bgcolor: "primary.light", fontWeight: "bold", fontSize: 20 }}>
           {getInitials(agent.name)}
         </Avatar>
-        <Typography variant="h6">{agent.name}</Typography>
+        <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
+          {agent.name}
+        </Typography>
       </Box>
 
       {/* Messages List */}
       <Box
         sx={{
           flex: 1,
-          p: 2,
+          p: 3,
           overflowY: "auto",
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#f5f7fa",
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          gap: 1.5,
+          scrollbarWidth: "thin",
+          scrollbarColor: "#c0c0c0 transparent",
+          "&::-webkit-scrollbar": {
+            width: 6,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#c0c0c0",
+            borderRadius: 3,
+          },
         }}
       >
-        {messages.map((msg) => (
-          <Box
-            key={msg.id}
-            sx={{
-              maxWidth: "80%",
-              alignSelf: msg.from === "user" ? "flex-end" : "flex-start",
-              bgcolor: msg.from === "user" ? "primary.main" : "grey.300",
-              color: msg.from === "user" ? "primary.contrastText" : "text.primary",
-              borderRadius: 2,
-              p: 1.5,
-              boxShadow: 1,
-            }}
-          >
-            <Typography variant="body1">{msg.text}</Typography>
-            <Typography
-              variant="caption"
-              sx={{ display: "block", textAlign: "right", mt: 0.5 }}
+        {messages.map((msg) => {
+          const isUser = msg.from === "user";
+          return (
+            <Box
+              key={msg.id}
+              sx={{
+                maxWidth: "75%",
+                alignSelf: isUser ? "flex-end" : "flex-start",
+                bgcolor: isUser ? "primary.main" : "grey.200",
+                color: isUser ? "primary.contrastText" : "text.primary",
+                borderRadius: 3,
+                p: 1.8,
+                boxShadow: 1,
+                wordBreak: "break-word",
+                fontSize: 14,
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  width: 0,
+                  height: 0,
+                  borderStyle: "solid",
+                  borderWidth: isUser ? "0 0 10px 10px" : "10px 10px 0 0",
+                  borderColor: isUser
+                    ? `transparent transparent #1976d2 transparent`
+                    : `#e0e0e0 transparent transparent transparent`,
+                  right: isUser ? -10 : "auto",
+                  left: isUser ? "auto" : -10,
+                  filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.05))",
+                },
+              }}
             >
-              {msg.timestamp.toLocaleTimeString()}
-            </Typography>
-          </Box>
-        ))}
+              <Typography variant="body1">{msg.text}</Typography>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", textAlign: "right", mt: 0.5, opacity: 0.6 }}
+              >
+                {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </Typography>
+            </Box>
+          );
+        })}
+        <div ref={messagesEndRef} />
       </Box>
 
       {/* Input Area */}
@@ -144,17 +181,48 @@ export default function ChatPage() {
           e.preventDefault();
           handleSend();
         }}
-        sx={{ p: "4px 8px", display: "flex", alignItems: "center" }}
+        sx={{
+          p: "6px 12px",
+          display: "flex",
+          alignItems: "center",
+          bgcolor: "background.paper",
+          boxShadow: "inset 0 1px 3px rgb(0 0 0 / 0.1)",
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
       >
         <TextField
           variant="outlined"
-          placeholder="Type your message"
+          placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          size="small"
+          size="medium"
           fullWidth
+          autoComplete="off"
+          InputProps={{
+            endAdornment: input && (
+              <InputAdornment position="end">
+                <Tooltip title="Clear">
+                  <IconButton
+                    onClick={handleClearInput}
+                    size="small"
+                    edge="end"
+                    aria-label="clear message"
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+          }}
         />
-        <IconButton color="primary" onClick={handleSend} sx={{ ml: 1 }}>
+        <IconButton
+          type="submit"
+          color="primary"
+          disabled={!input.trim()}
+          aria-label="send message"
+          sx={{ ml: 1 }}
+        >
           <SendIcon />
         </IconButton>
       </Paper>

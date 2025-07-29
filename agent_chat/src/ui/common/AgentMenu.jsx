@@ -17,7 +17,7 @@ const AgentMenu = ({
   onEdit,
   onDelete,
   onDuplicate,
-  onShowWidget, // New prop for showing widget
+  onShowWidget, // New prop for chat widget
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -28,9 +28,7 @@ const AgentMenu = ({
   };
 
   const handleClose = (event) => {
-    if (event) {
-      event.stopPropagation();
-    }
+    if (event) event.stopPropagation();
     setAnchorEl(null);
   };
 
@@ -52,7 +50,7 @@ const AgentMenu = ({
   const handleChat = (event) => {
     handleClose(event);
     if (onShowWidget) {
-      onShowWidget(agent); // Show floating widget instead of navigating
+      onShowWidget(agent);
     }
   };
 
