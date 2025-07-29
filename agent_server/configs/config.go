@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -9,19 +10,28 @@ import (
 )
 
 type AppConfig struct {
-	Name         string   `mapstructure:"service_name" validate:"required"`
-	DBSource     string   `mapstructure:"db_source" validate:"required"`
-	DbConfig     DBConfig `mapstructure:"db" validate:"required"`
-	MigrationUrl string   `mapstructure:"migration_url" validate:"required"`
-	Version      string   `mapstructure:"version" validate:"required"`
-	Host         string   `mapstructure:"host" validate:"required"`
-	Secret       string   `mapstructure:"secret" validate:"required"`
-	Port         int      `mapstructure:"port" validate:"required"`
-	LogLevel     string   `mapstructure:"log_level" validate:"required"`
-	CertPath     string   `mapstructure:"cert_path" validate:"required"`
-	KeyPath      string   `mapstructure:"key_path" validate:"required"`
-	LyzrAPIURL   string   `mapstructure:"lyzr_api_url" validate:"required"`
-	LyzrAPIKey   string   `mapstructure:"lyzr_api_key" validate:"required"`
+	Name             string   `mapstructure:"service_name" validate:"required"`
+	DBSource         string   `mapstructure:"db_source" validate:"required"`
+	DbConfig         DBConfig `mapstructure:"db" validate:"required"`
+	MigrationUrl     string   `mapstructure:"migration_url" validate:"required"`
+	Version          string   `mapstructure:"version" validate:"required"`
+	Host             string   `mapstructure:"host" validate:"required"`
+	Secret           string   `mapstructure:"secret" validate:"required"`
+	Port             int      `mapstructure:"port" validate:"required"`
+	WebTransportPort int      `mapstructure:"webtransport_port" validate:"required"`
+	LogLevel         string   `mapstructure:"log_level" validate:"required"`
+	CertPath         string   `mapstructure:"cert_path" validate:"required"`
+	KeyPath          string   `mapstructure:"key_path" validate:"required"`
+	LyzrAPIURL       string   `mapstructure:"lyzr_api_url" validate:"required"`
+	LyzrAPIKey       string   `mapstructure:"lyzr_api_key" validate:"required"`
+}
+
+func (app *AppConfig) GetWebTransportURL() string {
+	return fmt.Sprintf("%s:%d", app.Host, app.WebTransportPort)
+}
+
+func (app *AppConfig) GetHttpURL() string {
+	return fmt.Sprintf("%s:%d", app.Host, app.Port)
 }
 
 func InitConfig() (*viper.Viper, error) {

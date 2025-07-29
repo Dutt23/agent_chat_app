@@ -30,13 +30,22 @@ func main() {
 	appRunner.server = s
 	appRunner.Init(ctx)
 	defer appRunner.close(ctx)
-	go func() {
-		log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%d", cfg.Port), cfg.CertPath, cfg.KeyPath, appRunner.server.E))
-	}()
-	err = appRunner.server.S.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	go appRunner.RunHttpServer()
+	go appRunner.RunWebtransportServer(ctx)
+	appRunner.RunHttp3Server()
+
+}
+
+func (app *AppRunner) RunHttpServer() {
+	log.Fatal(http.ListenAndServeTLS(app.server.config.GetHttpURL(), app.server.config.CertPath, app.server.config.KeyPath, app.server.E))
+}
+
+func (app *AppRunner) RunHttp3Server() {
+	log.Fatal(app.server.S.ListenAndServe())
+}
+
+func (app *AppRunner) RunWebtransportServer(ctx context.Context) {
+	log.Fatal(app.server.WS.ListenAndServe())
 }
 
 func (app *AppRunner) ResolveConfig() (*configs.AppConfig, error) {

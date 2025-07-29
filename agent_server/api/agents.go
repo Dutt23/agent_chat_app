@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/quic-go/webtransport-go"
 	clients "github.com/sdutt/agentserver/clients/lyzr"
 	"github.com/sdutt/agentserver/configs"
 	lyzr "github.com/sdutt/agentserver/models/lyzr"
@@ -12,10 +13,11 @@ import (
 type agentApi struct {
 	config     *configs.AppConfig
 	lyzrClient *clients.LyzrClient
+	ws         *webtransport.Server
 }
 
-func NewAgentApi(config *configs.AppConfig, lyzr_client *clients.LyzrClient) *agentApi {
-	return &agentApi{config, lyzr_client}
+func NewAgentApi(config *configs.AppConfig, lyzr_client *clients.LyzrClient, ws *webtransport.Server) *agentApi {
+	return &agentApi{config, lyzr_client, ws}
 }
 
 func (api *agentApi) CreateAgent(c *gin.Context) {
@@ -43,4 +45,25 @@ func (api *agentApi) ListAgents(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+func (api *agentApi) Chat(c *gin.Context) {
+	sess, err := api.ws.Upgrade(c.Writer, c.Request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	defer sess.CloseWithError(0, "bye")
+	stream, err := sess.AcceptStream(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	buf := make([]byte, 1024)
+	for {
+		_, err := stream.Read(buf)
+		if err != nil {
+			break
+		}
+	}
 }

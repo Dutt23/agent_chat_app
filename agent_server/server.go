@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/quic-go/qlog"
+	"github.com/quic-go/webtransport-go"
 	"github.com/sdutt/agentserver/api"
 	clients "github.com/sdutt/agentserver/clients/lyzr"
 	"github.com/sdutt/agentserver/configs"
@@ -22,12 +22,14 @@ type Server struct {
 	Closeable []func(context.Context) error
 	E         *gin.Engine
 	S         *http3.Server
+	WS        *webtransport.Server
 }
 
 type routerOpts struct {
 	router      *gin.Engine
 	config      *configs.AppConfig
 	lyzr_client *clients.LyzrClient
+	ws          *webtransport.Server
 }
 
 func NewServer(config *configs.AppConfig) (*Server, error) {
@@ -45,13 +47,6 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 		// Optionally set more fields here
 	}))
 	lyzr_client := clients.NewLyzrClient(config)
-	opts := &routerOpts{
-		router:      router,
-		config:      config,
-		lyzr_client: lyzr_client,
-	}
-
-	server.setupRouter(opts)
 
 	cert, err := tls.LoadX509KeyPair(config.CertPath, config.KeyPath)
 
@@ -60,7 +55,7 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 	}
 
 	server.S = &http3.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    config.GetHttpURL(),
 		Handler: router,
 		QUICConfig: &quic.Config{
 			Tracer: qlog.DefaultConnectionTracer,
@@ -69,7 +64,29 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 			Certificates: []tls.Certificate{cert},
 		},
 	}
+
+	webTransportTls := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"h3"},
+	}
+
+	server.WS = &webtransport.Server{
+		H3: http3.Server{
+			Addr:      config.GetWebTransportURL(),
+			TLSConfig: webTransportTls,
+		},
+	}
+
 	server.E = router
+
+	opts := &routerOpts{
+		router:      router,
+		config:      config,
+		lyzr_client: lyzr_client,
+		ws:          server.WS,
+	}
+
+	server.setupRouter(opts)
 	return server, nil
 }
 
@@ -85,9 +102,10 @@ func (server *Server) setupRouter(opts *routerOpts) {
 }
 
 func (server *Server) addAgentRoutes(grp *gin.RouterGroup, opts *routerOpts) {
-	agentHandler := api.NewAgentApi(opts.config, opts.lyzr_client)
+	agentHandler := api.NewAgentApi(opts.config, opts.lyzr_client, opts.ws)
 	grp.POST("/agents", agentHandler.CreateAgent)
 	grp.GET("/agents", agentHandler.ListAgents)
+	grp.GET("/agents/chat/:id", agentHandler.Chat)
 }
 
 func (server *Server) addCredentialRoutes(grp *gin.RouterGroup, opts *routerOpts) {

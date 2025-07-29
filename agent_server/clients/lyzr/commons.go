@@ -24,39 +24,39 @@ func (e *APIError) Error() string {
 }
 
 type AgentResponse struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
-  AgentId string `json:"agent_id"`
+	AgentId string `json:"agent_id"`
 }
 
 type Agent struct {
-    ID                     string                 `json:"_id"`
-    ApiKey                 string                 `json:"api_key"`
-    Name                   string                 `json:"name"`
-    Description            string                 `json:"description"`
-    AgentRole              *string                `json:"agent_role"`              // nullable
-    AgentInstructions      *string                `json:"agent_instructions"`      // nullable
-    AgentGoal              *string                `json:"agent_goal"`              // nullable
-    AgentContext           interface{}            `json:"agent_context"`           // could be null/any
-    AgentOutput            interface{}            `json:"agent_output"`            // could be null/any
-    Examples               interface{}            `json:"examples"`                // could be null/any
-    Features               []interface{}          `json:"features"`                // empty slice on some, can contain values
-    Tool                   string                 `json:"tool,omitempty"`          // sometimes present, sometimes absent
-    Tools                  []interface{}          `json:"tools,omitempty"`         // sometimes present, sometimes absent
-    ToolUsageDescription   interface{}            `json:"tool_usage_description"`  // can be string, object or null
-    ResponseFormat         map[string]interface{} `json:"response_format"`         // sometimes "type":"text", sometimes empty object
-    ProviderID             string                 `json:"provider_id"`
-    Model                  string                 `json:"model"`
-    TopP                   float64                `json:"top_p"`
-    Temperature            float64                `json:"temperature"`
-    ManagedAgents          interface{}            `json:"managed_agents"`          // could be []interface{}, null, or absent
-    Version                string                 `json:"version"`
-    CreatedAt              string                 `json:"created_at"`
-    UpdatedAt              string                 `json:"updated_at"`
-    LLM_CredentialID       string                 `json:"llm_credential_id"`
-    TemplateType           string                 `json:"template_type,omitempty"` // sometimes present
+	ID                   string                 `json:"_id"`
+	ApiKey               string                 `json:"api_key"`
+	Name                 string                 `json:"name"`
+	Description          string                 `json:"description"`
+	AgentRole            *string                `json:"agent_role"`             // nullable
+	AgentInstructions    *string                `json:"agent_instructions"`     // nullable
+	AgentGoal            *string                `json:"agent_goal"`             // nullable
+	AgentContext         interface{}            `json:"agent_context"`          // could be null/any
+	AgentOutput          interface{}            `json:"agent_output"`           // could be null/any
+	Examples             interface{}            `json:"examples"`               // could be null/any
+	Features             []interface{}          `json:"features"`               // empty slice on some, can contain values
+	Tool                 string                 `json:"tool,omitempty"`         // sometimes present, sometimes absent
+	Tools                []interface{}          `json:"tools,omitempty"`        // sometimes present, sometimes absent
+	ToolUsageDescription interface{}            `json:"tool_usage_description"` // can be string, object or null
+	ResponseFormat       map[string]interface{} `json:"response_format"`        // sometimes "type":"text", sometimes empty object
+	ProviderID           string                 `json:"provider_id"`
+	Model                string                 `json:"model"`
+	TopP                 float64                `json:"top_p"`
+	Temperature          float64                `json:"temperature"`
+	ManagedAgents        interface{}            `json:"managed_agents"` // could be []interface{}, null, or absent
+	Version              string                 `json:"version"`
+	CreatedAt            string                 `json:"created_at"`
+	UpdatedAt            string                 `json:"updated_at"`
+	LLM_CredentialID     string                 `json:"llm_credential_id"`
+	TemplateType         string                 `json:"template_type,omitempty"` // sometimes present
 }
 
 type ListAgentResponse struct {
