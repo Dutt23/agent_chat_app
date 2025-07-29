@@ -18,9 +18,9 @@ type Feature struct {
 type AgentPayload struct {
 	Name            string                 `json:"name" validate:"required"`
 	SystemPrompt    string                 `json:"system_prompt" validate:"required"`
-	Description     string                 `json:"description" validate:"required"`
-	Features        []Feature              `json:"features" validate:"required,dive,required"`
-	Tools           []string               `json:"tools" validate:"required,min=1,dive,required"`
+	Description     string                 `json:"description"`
+	Features        []Feature              `json:"features"`
+	Tools           []string               `json:"tools"`
 	LLMCredentialID string                 `json:"llm_credential_id" validate:"required"`
 	ProviderID      string                 `json:"provider_id" validate:"required"`
 	Model           string                 `json:"model" validate:"required"`

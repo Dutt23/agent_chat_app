@@ -28,5 +28,10 @@ func (api *agentApi) CreateAgent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Validation failed: " + err.Error()})
 		return
 	}
-	api.lyzrClient.CreateAgent(c.Request.Context(), payload)
+	resp, err := api.lyzrClient.CreateAgent(c.Request.Context(), payload)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, resp)
 }

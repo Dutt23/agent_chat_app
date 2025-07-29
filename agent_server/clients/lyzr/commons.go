@@ -27,6 +27,8 @@ type AgentResponse struct {
 	ID     string `json:"id"`
 	Name   string `json:"name"`
 	Status string `json:"status"`
+	Message string `json:"message"`
+  AgentId string `json:"agent_id"`
 }
 
 var (

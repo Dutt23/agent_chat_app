@@ -17,7 +17,7 @@ func NewLyzrClient(config *configs.AppConfig) *LyzrClient {
 }
 
 func (client *LyzrClient) CreateAgent(ctx context.Context, payload models.AgentPayload) (*AgentResponse, error) {
-	url := client.config.LyzrAPIURL + "/v3/agents"
+	url := client.config.LyzrAPIURL + "/v3/agents/"
 	headers := map[string]string{
 		"x-api-key": client.config.LyzrAPIKey,
 	}
@@ -30,6 +30,7 @@ func (client *LyzrClient) CreateCredentials(ctx context.Context, payload models.
 	url := client.config.LyzrAPIURL + "/v3/tools/credentials"
 	headers := map[string]string{
 		"x-api-key": client.config.LyzrAPIKey,
+		"accept":    "application/json",
 	}
 	return CallAndUnmarshal[AgentResponse](
 		ctx, http.MethodPost, url, payload, headers,
