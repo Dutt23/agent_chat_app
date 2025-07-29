@@ -1,0 +1,24 @@
+[
+  {
+    "id": "openai",
+    "label": "OpenAI",
+    "models": [
+      { "id": "gpt-4", "label": "GPT-4" },
+      { "id": "gpt-3.5-turbo", "label": "GPT-3.5 Turbo" }
+    ]
+  },
+  {
+    "id": "anthropic",
+    "label": "Anthropic Claude",
+    "models": [
+      { "id": "claude-3", "label": "Claude 3" }
+    ]
+  },
+  {
+    "id": "google",
+    "label": "Google Gemini",
+    "models": [
+      { "id": "gemini-1.5", "label": "Gemini 1.5 Pro" }
+    ]
+  }
+]

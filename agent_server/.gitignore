@@ -1,0 +1,4 @@
+# Ignore TLS certificates/keys
+server.crt
+server.key
+agentchat.db

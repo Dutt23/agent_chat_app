@@ -29,7 +29,7 @@ func main() {
   appRunner.server = s
 	appRunner.Init(ctx)
 	defer appRunner.close(ctx)
-  appRunner.server.E.Run(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+  appRunner.server.S.ListenAndServe()
 }
 
 func (app *AppRunner) ResolveConfig() (*configs.AppConfig, error) {

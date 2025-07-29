@@ -1,6 +1,7 @@
 // Dashboard.jsx
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Flex,
@@ -19,56 +20,66 @@ import { ChatWidgetPreview } from "./tabs/ChatWidgetPreview";
 import { TicketManager } from "./tabs/TicketManager";
 import { UserManager } from "./tabs/UserManager";
 
-// Tab configuration
-const TAB_CONFIG = {
-  chatbots: {
-    key: "chatbots",
-    label: "Chatbots",
-    icon: FiMessageSquare,
-    headerAction: (
-      <Button leftIcon={<FiPlus />} colorScheme="blue" size="md">
-        New Chatbot
-      </Button>
-    ),
-    component: ChatWidgetPreview,
-  },
-  users: {
-    key: "users",
-    label: "Users",
-    icon: FiUsers,
-    headerAction: null,
-    component: UserManager,
-  },
-  tickets: {
-    key: "tickets",
-    label: "Tickets",
-    icon: FiMessageCircle,
-    headerAction: null,
-    component: TicketManager,
-  },
-  settings: {
-    key: "settings",
-    label: "Agent Settings",
-    icon: FiSettings,
-    headerAction: null,
-    component: AgentTuning,
-  },
-};
-
-// Convert config to navItems for Sidebar
-const navItems = Object.values(TAB_CONFIG).map(({ key, label, icon }) => ({
-  key,
-  label,
-  icon,
-}));
-
 export function Dashboard({ user }) {
   // Active tab state (manual – not Chakra Tabs)
   const [activeTab, setActiveTab] = useState("chatbots");
+  const navigate = useNavigate();
 
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
   };
+
+  const handleNewChatbotClick = () => {
+    navigate('/chatbots/new');
+  };
+
+  // Tab configuration
+  const TAB_CONFIG = {
+    chatbots: {
+      key: "chatbots",
+      label: "Chatbots",
+      icon: FiMessageSquare,
+      headerAction: (
+        <Button 
+          leftIcon={<FiPlus />} 
+          colorScheme="blue" 
+          size="md"
+          onClick={handleNewChatbotClick}
+        >
+          New Chatbot
+        </Button>
+      ),
+      component: ChatWidgetPreview,
+    },
+    users: {
+      key: "users",
+      label: "Users",
+      icon: FiUsers,
+      headerAction: null,
+      component: UserManager,
+    },
+    tickets: {
+      key: "tickets",
+      label: "Tickets",
+      icon: FiMessageCircle,
+      headerAction: null,
+      component: TicketManager,
+    },
+    settings: {
+      key: "settings",
+      label: "Agent Settings",
+      icon: FiSettings,
+      headerAction: null,
+      component: AgentTuning,
+    },
+  };
+
+  // Convert config to navItems for Sidebar
+  const navItems = Object.values(TAB_CONFIG).map(({ key, label, icon }) => ({
+    key,
+    label,
+    icon,
+  }));
 
   return (
     <Flex h="100vh" bg="white" overflow="hidden">
