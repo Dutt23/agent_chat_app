@@ -16,10 +16,8 @@ export default function AgentCreationForm() {
   const [name, setName] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [description, setDescription] = useState("");
-  const [features, setFeatures] = useState([
-    { type: "", config: "{}", priority: 0 }
-  ]);
-  const [tools, setTools] = useState([""]);
+  const [features, setFeatures] = useState([]);
+  const [tools, setTools] = useState([]);
   const [llmCredentialId, setLlmCredentialId] = useState("");
   const [providerId, setProviderId] = useState("");
   const [model, setModel] = useState("");
@@ -30,12 +28,10 @@ export default function AgentCreationForm() {
 
   // Options
   const [providerOptions, setProviderOptions] = useState([]);
-  const [credentialOptions, setCredentialOptions] = useState([]);
   const [modelOptions, setModelOptions] = useState([]);
 
   // State for credentials modal
   const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false);
-  const [lyzrApiKey, setLyzrApiKey] = useState(""); // You'll need to set this from your auth context or props
 
   const mutation = useMutation({
     mutationFn: createAgent,
@@ -107,13 +103,14 @@ export default function AgentCreationForm() {
     }));
 
     const parsedResponseFormat = parseResponseFormat(responseFormat);
+    console.log(providerId)
     const payload = {
       name,
       system_prompt: systemPrompt,
       description,
       features: parsedFeatures,
       tools,
-      llm_credential_id: llmCredentialId,
+      llm_credential_id: llmCredentials?.id,
       provider_id: providerId,
       model,
       top_p: Number(topP),
@@ -300,7 +297,6 @@ export default function AgentCreationForm() {
           <CreateCredentialsModal 
             open={isCredentialModalOpen}
             onClose={() => setIsCredentialModalOpen(false)}
-            lyzrApiKey={lyzrApiKey}
             onSuccess={handleCredentialCreated}
           />
 

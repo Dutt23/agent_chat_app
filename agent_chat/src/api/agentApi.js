@@ -1,11 +1,9 @@
 export async function createAgent(payload) {
-  const res = await fetch("https://localhost:8443/v1/agents", {
+  const res = await fetch("https://localhost:6121/v1/agents", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // Add 'Authorization': 'Bearer ...' here if needed
     },
-    credentials: "include", // Remove if not using cookies/session-based auth
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
