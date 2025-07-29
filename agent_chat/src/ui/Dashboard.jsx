@@ -12,7 +12,7 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { FiMessageSquare, FiUsers, FiSettings, FiPlus, FiMessageCircle } from "react-icons/fi";
-import { Sidebar } from "./Sidebar";
+import { Sidebar } from "../components/Sidebar";
 
 // Import tab components
 import { AgentTuning } from "./tabs/AgentTuning";

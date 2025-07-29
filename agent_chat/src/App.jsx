@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { Flex } from "@chakra-ui/react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthForm } from "./components/AuthForm";
-import { Dashboard } from "./components/Dashboard";
-import  NewChatBot  from "./components/forms/NewChatBot";
+import { AuthForm } from "./ui/AuthForm";
+import { Dashboard } from "./ui/Dashboard";
+import  NewChatBot  from "./ui/NewChatBot";
 
 function AppContent({ user, setUser }) {
   // Fixed, app-wide background/colors
