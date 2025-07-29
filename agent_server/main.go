@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sdutt/agentserver/configs"
@@ -29,7 +30,13 @@ func main() {
 	appRunner.server = s
 	appRunner.Init(ctx)
 	defer appRunner.close(ctx)
-	appRunner.server.S.ListenAndServe()
+	go func() {
+		log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%d", cfg.Port), cfg.CertPath, cfg.KeyPath, appRunner.server.E))
+	}()
+	err = appRunner.server.S.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (app *AppRunner) ResolveConfig() (*configs.AppConfig, error) {

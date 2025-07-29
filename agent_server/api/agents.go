@@ -10,7 +10,7 @@ import (
 )
 
 type agentApi struct {
-	config *configs.AppConfig
+	config     *configs.AppConfig
 	lyzrClient *clients.LyzrClient
 }
 

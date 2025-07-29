@@ -18,9 +18,10 @@ type AppConfig struct {
 	Secret       string   `mapstructure:"secret" validate:"required"`
 	Port         int      `mapstructure:"port" validate:"required"`
 	LogLevel     string   `mapstructure:"log_level" validate:"required"`
-
-	LyzrAPIURL string `mapstructure:"lyzr_api_url" validate:"required"`
-	LyzrAPIKey string `mapstructure:"lyzr_api_key" validate:"required"`
+	CertPath     string   `mapstructure:"cert_path" validate:"required"`
+	KeyPath      string   `mapstructure:"key_path" validate:"required"`
+	LyzrAPIURL   string   `mapstructure:"lyzr_api_url" validate:"required"`
+	LyzrAPIKey   string   `mapstructure:"lyzr_api_key" validate:"required"`
 }
 
 func InitConfig() (*viper.Viper, error) {

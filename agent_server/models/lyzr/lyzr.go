@@ -2,6 +2,13 @@ package models
 
 import "github.com/go-playground/validator"
 
+type CredentialPayload struct {
+	Name        string                 `json:"name"`
+	ProviderID  string                 `json:"provider_id"`
+	Credentials map[string]string      `json:"credentials"`
+	MetaData    map[string]interface{} `json:"meta_data"`
+}
+
 type Feature struct {
 	Type     string                 `json:"type" validate:"required"`
 	Config   map[string]interface{} `json:"config" validate:"required"` // can be empty object
