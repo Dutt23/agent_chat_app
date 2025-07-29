@@ -23,6 +23,12 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("API error: %s (status %d)", e.Message, e.StatusCode)
 }
 
+type AgentResponse struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
+
 var (
 	transport = &http.Transport{
 		MaxIdleConns:        100,

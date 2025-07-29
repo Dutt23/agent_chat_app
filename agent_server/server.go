@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/quic-go/quic-go/http3"
+	"github.com/sdutt/agentserver/api"
+	clients "github.com/sdutt/agentserver/clients/lyzr"
 	"github.com/sdutt/agentserver/configs"
 	"github.com/sdutt/agentserver/pkg/connectors"
 )
@@ -18,19 +20,27 @@ type Server struct {
 	S         *http3.Server
 }
 
-type routerOpts struct{}
+type routerOpts struct{
+	router *gin.Engine
+	config *configs.AppConfig
+	lyzr_client *clients.LyzrClient
+}
 
 func NewServer(config *configs.AppConfig) (*Server, error) {
 	server := &Server{
 		config: config,
 	}
 
-	// Init storages
 	server.AllConnectors()
-
-	opts := &routerOpts{}
-	server.setupRouter(opts)
 	router := gin.Default()
+	lyzr_client := clients.NewLyzrClient(config)
+	opts := &routerOpts{
+		router: router,
+		config: config,
+		lyzr_client: lyzr_client,
+	}
+
+	server.setupRouter(opts)
 	cert, err := tls.LoadX509KeyPair("server.crt", "server.key")
 	if err != nil {
 		return nil, err
@@ -42,6 +52,8 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 		Addr:      ":8443",
 		Handler:   router, // <-- Gin router (handles all routes
 		TLSConfig: http3.ConfigureTLSConfig(tlsConf)}
+
+	server.E = router
 	return server, nil
 }
 
@@ -51,7 +63,13 @@ func (s *Server) AllConnectors() {
 }
 
 func (server *Server) setupRouter(opts *routerOpts) {
-	router := gin.Default()
-	// apiv1 := router.Group("/v1/")
-	server.E = router
+	apiv1 := opts.router.Group("/v1/")
+	server.addAgentRoutes(apiv1, opts)
 }
+
+func (server *Server) addAgentRoutes(grp *gin.RouterGroup, opts *routerOpts) { 
+	agentHandler := api.NewAgentApi(opts.config)
+	grp.POST("/agents", agentHandler.CreateAgent)
+}
+	
+
