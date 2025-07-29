@@ -8,8 +8,11 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import providersData from "../data/providers_and_models.json";
 import credentialsData from "../data/credentials.json";
+import { useMutation } from "@tanstack/react-query";
+import { createAgent, parseFeatureConfig, parseResponseFormat } from "../api/agentApi";
+import CreateCredentialsModal from "./modals/CreateCredentialsModal";
 
-export default function AgentCreationForm({ onSubmit }) {
+export default function AgentCreationForm() {
   // State
   const [name, setName] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -29,6 +32,20 @@ export default function AgentCreationForm({ onSubmit }) {
   const [providerOptions, setProviderOptions] = useState([]);
   const [credentialOptions, setCredentialOptions] = useState([]);
   const [modelOptions, setModelOptions] = useState([]);
+
+  // State for credentials modal
+  const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false);
+  const [lyzrApiKey, setLyzrApiKey] = useState(""); // You'll need to set this from your auth context or props
+
+  const mutation = useMutation({
+    mutationFn: createAgent,
+    onSuccess: data => {
+      alert("Agent created! " + (data.id || JSON.stringify(data)));
+    },
+    onError: error => {
+      alert("Creation failed: " + error.message);
+    },
+  });
 
   // Loads mock/static data
   useEffect(() => {
@@ -64,35 +81,38 @@ export default function AgentCreationForm({ onSubmit }) {
   const addTool = () => setTools([...tools, ""]);
   const removeTool = (idx) => setTools(tools.filter((_, i) => i !== idx));
 
+  // Add this function to refresh credentials after a new one is created
+  const handleCredentialCreated = () => {
+    // You might want to add logic here to refresh the credentials list
+    // For example, if you fetch credentials from an API
+    console.log("New credential created, refresh credentials list here");
+  };
+
   // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
     // Defensive parse for config and response_format
-    const safeJsonParse = (txt) => {
-      try {
-        return JSON.parse(txt || "{}");
-      } catch {
-        return {};
-      }
-    };
+    const parsedFeatures = features.map(f => ({
+      type: f.type,
+      config: parseFeatureConfig(f.config), // config str to object
+      priority: Number(f.priority),
+    }));
+
+    const parsedResponseFormat = parseResponseFormat(responseFormat);
     const payload = {
-      name: name,
+      name,
       system_prompt: systemPrompt,
-      description: description,
-      features: features.map((f) => ({
-        type: f.type,
-        config: safeJsonParse(f.config),
-        priority: Number(f.priority)
-      })),
-      tools: tools.filter(Boolean),
+      description,
+      features: parsedFeatures,
+      tools,
       llm_credential_id: llmCredentialId,
       provider_id: providerId,
-      model: model,
+      model,
       top_p: Number(topP),
       temperature: Number(temperature),
-      response_format: safeJsonParse(responseFormat)
+      response_format: parsedResponseFormat,
     };
-    if (onSubmit) onSubmit(payload);
+    mutation.mutate(payload);
   };
 
   return (
@@ -104,6 +124,15 @@ export default function AgentCreationForm({ onSubmit }) {
             Create a Lyzr Agent
           </Typography>
           
+          <Button 
+            variant="outlined" 
+            onClick={() => setIsCredentialModalOpen(true)}
+            sx={{ mb: 3 }}
+            startIcon={<AddCircleIcon />}
+          >
+            Add New Credentials
+          </Button>
+
           <TextField
             fullWidth
             label="Agent Name"
@@ -252,6 +281,13 @@ export default function AgentCreationForm({ onSubmit }) {
             value={responseFormat}
             onChange={(e) => setResponseFormat(e.target.value)}
             margin="normal"
+          />
+
+          <CreateCredentialsModal 
+            open={isCredentialModalOpen}
+            onClose={() => setIsCredentialModalOpen(false)}
+            lyzrApiKey={lyzrApiKey}
+            onSuccess={handleCredentialCreated}
           />
 
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
