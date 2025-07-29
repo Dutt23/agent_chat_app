@@ -8,7 +8,7 @@ export default function App() {
   const [user, setUser] = useState({});
 
   // Fixed, app-wide background/colors
-  const bg = "blue.50";
+  const bg = "white";
 
   return (
     <Flex

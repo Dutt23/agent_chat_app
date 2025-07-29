@@ -6,13 +6,12 @@ import {
   Flex,
   Text,
   VStack,
-  Avatar,
   Button,
-  Icon,
   Heading,
   SimpleGrid,
 } from "@chakra-ui/react";
 import { FiMessageSquare, FiUsers, FiSettings, FiPlus } from "react-icons/fi";
+import { Sidebar } from "./Sidebar";
 
 // Sidebar navigation items
 const navItems = [
@@ -32,52 +31,29 @@ export function Dashboard({ user }) {
   // Active tab state (manual – not Chakra Tabs)
   const [activeTab, setActiveTab] = useState("chatbots");
 
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+  };
+
   return (
-    <Flex h="100vh" bg="gray.50">
+    <Flex h="100vh" bg="white" overflow="hidden">
       {/* Sidebar */}
-      <Box
-        w={{ base: "64px", md: "220px" }}
-        bg="white"
-        boxShadow="md"
-        borderRight="1px solid"
-        borderColor="gray.200"
-        p={4}
-        display="flex"
-        flexDirection="column"
-        alignItems={{ base: "center", md: "flex-start" }}
-      >
-        <Text
-          fontWeight="bold"
-          color="blue.600"
-          fontSize="xl"
-          mb={8}
-          display={{ base: "none", md: "block" }}
-        >
-          Chat Support
-        </Text>
-        <VStack spacing={2} align="stretch" flex="1">
-          {navItems.map(({ icon, label, key }) => (
-            <Button
-              key={key}
-              variant={activeTab === key ? "solid" : "ghost"}
-              colorScheme="blue"
-              leftIcon={<Icon as={icon} boxSize={5} />}
-              w="100%"
-              justifyContent={{ base: "center", md: "flex-start" }}
-              fontWeight={activeTab === key ? "bold" : "normal"}
-              onClick={() => setActiveTab(key)}
-            >
-              <Text display={{ base: "none", md: "inline" }}>{label}</Text>
-            </Button>
-          ))}
-        </VStack>
-        {/* <Box mt={8} alignSelf="center">
-          <Avatar name={user?.email || "User"} size="md" />
-        </Box> */}
-      </Box>
+      <Sidebar 
+        navItems={navItems}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        user={user}
+      />
 
       {/* Main Content */}
-      <Flex flex="1" flexDir="column">
+      <Flex 
+        flex="1" 
+        flexDir="column"
+        ml={{ base: "64px", md: "220px" }}
+        width={{ base: "calc(100% - 64px)", md: "calc(100% - 220px)" }}
+        minW={0} /* Prevents flex items from overflowing */
+        bg="white"
+      >
         {/* Header */}
         <Flex
           as="header"
@@ -103,7 +79,7 @@ export function Dashboard({ user }) {
           )}
         </Flex>
         {/* Main Panel */}
-        <Box p={8} flex="1" overflow="auto">
+        <Box p={8} flex="1" overflow="auto" bg="white">
           {/* Chatbots list */}
           {activeTab === "chatbots" && (
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
