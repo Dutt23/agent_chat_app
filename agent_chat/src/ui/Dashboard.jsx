@@ -5,18 +5,15 @@ import { useNavigate } from "react-router-dom";
 import {
   Box,
   Flex,
-  Text,
-  VStack,
   Button,
   Heading,
-  SimpleGrid,
 } from "@chakra-ui/react";
 import { FiMessageSquare, FiUsers, FiSettings, FiPlus, FiMessageCircle } from "react-icons/fi";
 import { Sidebar } from "../components/Sidebar";
 
 // Import tab components
+import { AgentListPage } from "./tabs/AgentListPreview";
 import { AgentTuning } from "./tabs/AgentTuning";
-import { ChatWidgetPreview } from "./tabs/ChatWidgetPreview";
 import { TicketManager } from "./tabs/TicketManager";
 import { UserManager } from "./tabs/UserManager";
 
@@ -41,7 +38,7 @@ export function Dashboard({ user }) {
       icon: FiMessageSquare,
       headerAction: (
         <Button 
-          leftIcon={<FiPlus />} 
+          leftIcon={<FiPlus />}
           colorScheme="blue" 
           size="md"
           onClick={handleNewChatbotClick}
@@ -49,7 +46,7 @@ export function Dashboard({ user }) {
           New Chatbot
         </Button>
       ),
-      component: ChatWidgetPreview,
+      component: AgentListPage,
     },
     users: {
       key: "users",
@@ -82,9 +79,9 @@ export function Dashboard({ user }) {
   }));
 
   return (
-    <Flex h="100vh" bg="white" overflow="hidden">
+    <Flex h="100vh" bg="white" overflow="hidden" width="100vw">
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         navItems={navItems}
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -95,8 +92,9 @@ export function Dashboard({ user }) {
       <Flex 
         flex="1" 
         flexDir="column"
-        ml={{ base: "64px", md: "220px" }}
-        width={{ base: "calc(100% - 64px)", md: "calc(100% - 220px)" }}
+        /* Remove ml and width calc so it fills remaining width */
+        ml="0"
+        width="auto"
         minW={0} /* Prevents flex items from overflowing */
         bg="white"
       >
@@ -110,12 +108,14 @@ export function Dashboard({ user }) {
           bg="white"
           borderBottom="1px solid"
           borderColor="gray.200"
+          flexShrink={0}
         >
           <Heading size="lg" color="blue.800" fontWeight="extrabold">
             {TAB_CONFIG[activeTab]?.label || activeTab}
           </Heading>
           {TAB_CONFIG[activeTab]?.headerAction}
         </Flex>
+
         {/* Main Panel */}
         <Box p={8} flex="1" overflow="auto" bg="white">
           {(() => {

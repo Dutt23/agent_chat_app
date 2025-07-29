@@ -18,6 +18,25 @@ export async function createAgent(payload) {
   return res.json();
 }
 
+export async function listAgent() {
+  const res = await fetch("https://localhost:6121/v1/agents", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    let message;
+    try {
+      message = await res.text();
+    } catch {
+      message = `Failed with status ${res.status}`;
+    }
+    throw new Error(message);
+  }
+  return res.json();
+}
+
 export function parseFeatureConfig(str) {
   // Try to parse as JSON. Fallback to empty object
   try {
