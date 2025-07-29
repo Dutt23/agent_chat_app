@@ -59,7 +59,6 @@ func (app *AppRunner) Init(ctx context.Context) error {
 		fmt.Println("error while connecting to postgres.", err)
 		return err
 	}
-	app.server.DB = app.server.DB
 	app.Closeable = append(app.Closeable, app.server.DB.Disconnect)
 
 	return nil
