@@ -19,6 +19,7 @@ type AppConfig struct {
 	Secret           string   `mapstructure:"secret" validate:"required"`
 	Port             int      `mapstructure:"port" validate:"required"`
 	WebTransportPort int      `mapstructure:"webtransport_port" validate:"required"`
+	HttpPort         int      `mapstructure:"http_port" validate:"required"`
 	LogLevel         string   `mapstructure:"log_level" validate:"required"`
 	CertPath         string   `mapstructure:"cert_path" validate:"required"`
 	KeyPath          string   `mapstructure:"key_path" validate:"required"`
@@ -32,6 +33,10 @@ func (app *AppConfig) GetWebTransportURL() string {
 
 func (app *AppConfig) GetHttpURL() string {
 	return fmt.Sprintf("%s:%d", app.Host, app.Port)
+}
+
+func (app *AppConfig) GetHttpUrl() string {
+	return fmt.Sprintf("%s:%d", app.Host, app.HttpPort)
 }
 
 func InitConfig() (*viper.Viper, error) {

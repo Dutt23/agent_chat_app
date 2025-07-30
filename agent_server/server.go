@@ -111,8 +111,9 @@ func (server *Server) addAgentRoutes(grp *gin.RouterGroup, opts *routerOpts) {
 	agentHandler := api.NewAgentApi(opts.config, opts.lyzr_client, opts.ws)
 	grp.POST("/agents", agentHandler.CreateAgent)
 	grp.GET("/agents", agentHandler.ListAgents)
+	grp.GET("/agents/chat", agentHandler.ChatWs)
 	// opts.router.GET("/agents/chat", agentHandler.Chat)
-	opts.mux.HandleFunc("/agents/chat", agentHandler.Chat)
+	// opts.mux.HandleFunc("/agents/chat", agentHandler.Chat)
 }
 
 func (server *Server) addCredentialRoutes(grp *gin.RouterGroup, opts *routerOpts) {

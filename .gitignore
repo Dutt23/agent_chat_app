@@ -1,2 +1,5 @@
 server.crt
 server.key
+cert.pem
+san.cnf
+key.pem

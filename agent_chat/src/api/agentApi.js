@@ -1,5 +1,5 @@
 export async function createAgent(payload) {
-  const res = await fetch("https://localhost:6121/v1/agents", {
+  const res = await fetch("https://agent.chat.app:6121/v1/agents", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export async function createAgent(payload) {
 }
 
 export async function listAgent() {
-  const res = await fetch("https://localhost:6121/v1/agents", {
+  const res = await fetch("https://agent.chat.app:6121/v1/agents", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

@@ -30,14 +30,19 @@ func main() {
 	appRunner.server = s
 	appRunner.Init(ctx)
 	defer appRunner.close(ctx)
+	go appRunner.RunHttpTLSServer()
 	go appRunner.RunHttpServer()
 	go appRunner.RunWebtransportServer(ctx)
 	appRunner.RunHttp3Server()
 
 }
 
-func (app *AppRunner) RunHttpServer() {
+func (app *AppRunner) RunHttpTLSServer() {
 	log.Fatal(http.ListenAndServeTLS(app.server.config.GetHttpURL(), app.server.config.CertPath, app.server.config.KeyPath, app.server.E))
+}
+
+func (app *AppRunner) RunHttpServer() {
+	log.Fatal(http.ListenAndServe(app.server.config.GetHttpUrl(), app.server.E))
 }
 
 func (app *AppRunner) RunHttp3Server() {

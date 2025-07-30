@@ -7,7 +7,7 @@ export async function createCredential({ name, provider_id, meta_data, api_key }
     credentials: { api_key },
   };
 
-  const res = await fetch("https://localhost:6121/v1/credentials", {
+  const res = await fetch("https://agent.chat.app:6121/v1/credentials", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

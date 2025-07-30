@@ -9,8 +9,8 @@ export default defineConfig({
     port: 5173,                     // or whatever port you want
     allowedHosts: ['agent.chat.app'],
     https: {
-      key: fs.readFileSync('../server.key'), // path to your key
-      cert: fs.readFileSync('../server.crt'), // path to your cert
+      key: fs.readFileSync('../key.pem'), // path to your key
+      cert: fs.readFileSync('../cert.pem'), // path to your cert
     },
     // allow requests for this host
   }
