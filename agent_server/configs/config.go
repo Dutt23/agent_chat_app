@@ -63,7 +63,7 @@ func InitConfig() (*viper.Viper, error) {
 func setDefault(v *viper.Viper) {
 	v.SetDefault("SERVICE_NAME", "agentchat-project")
 	v.SetDefault("VERSION", "0.0.1")
-	v.SetDefault("HOST", "localhost")
+	v.SetDefault("HOST", "agent.chat.app")
 	v.SetDefault("PORT", "")
 	v.SetDefault("LOG_LEVEL", "debug")
 	//

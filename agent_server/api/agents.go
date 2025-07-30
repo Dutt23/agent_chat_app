@@ -47,16 +47,17 @@ func (api *agentApi) ListAgents(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (api *agentApi) Chat(c *gin.Context) {
-	sess, err := api.ws.Upgrade(c.Writer, c.Request)
+func (api *agentApi) Chat(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	sess, err := api.ws.Upgrade(w, r)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer sess.CloseWithError(0, "bye")
-	stream, err := sess.AcceptStream(c)
+	stream, err := sess.AcceptStream(ctx)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	buf := make([]byte, 1024)

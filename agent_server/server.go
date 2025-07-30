@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ type routerOpts struct {
 	config      *configs.AppConfig
 	lyzr_client *clients.LyzrClient
 	ws          *webtransport.Server
+	mux         *http.ServeMux
 }
 
 func NewServer(config *configs.AppConfig) (*Server, error) {
@@ -54,6 +56,7 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 		return nil, err
 	}
 
+	mux := http.NewServeMux()
 	server.S = &http3.Server{
 		Addr:    config.GetHttpURL(),
 		Handler: router,
@@ -74,6 +77,7 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 		H3: http3.Server{
 			Addr:      config.GetWebTransportURL(),
 			TLSConfig: webTransportTls,
+			Handler:   mux,
 		},
 	}
 
@@ -84,9 +88,11 @@ func NewServer(config *configs.AppConfig) (*Server, error) {
 		config:      config,
 		lyzr_client: lyzr_client,
 		ws:          server.WS,
+		mux:         mux,
 	}
 
 	server.setupRouter(opts)
+	// server.WS.H3.Handler = server.E
 	return server, nil
 }
 
@@ -105,7 +111,8 @@ func (server *Server) addAgentRoutes(grp *gin.RouterGroup, opts *routerOpts) {
 	agentHandler := api.NewAgentApi(opts.config, opts.lyzr_client, opts.ws)
 	grp.POST("/agents", agentHandler.CreateAgent)
 	grp.GET("/agents", agentHandler.ListAgents)
-	grp.GET("/agents/chat/:id", agentHandler.Chat)
+	// opts.router.GET("/agents/chat", agentHandler.Chat)
+	opts.mux.HandleFunc("/agents/chat", agentHandler.Chat)
 }
 
 func (server *Server) addCredentialRoutes(grp *gin.RouterGroup, opts *routerOpts) {
